@@ -1,3 +1,5 @@
+cargo-features = ["edition"]
+
 [package]
 name = "t1"
 version = "0.1.0"

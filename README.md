@@ -3,4 +3,4 @@
 
 Learning Rust by solving the [Advent Of Code challenge](https://adventofcode.com).
 
-- Day 1.
+- [Solution Day 1](https://github.com/cesarvr/AOCRust/tree/master/day-1).
