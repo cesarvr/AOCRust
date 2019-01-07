@@ -11,30 +11,14 @@ fn debug_dict(dict: &Dict) {
     }
 }
 
-fn reduce(dict: &Dict) {
-    for key in dict.keys() {
-        match dict.get(key) {
-           Some(data) => println!("key {} -> {}", key, data),
-           None => println!("{} empty!.", key)
-       }
-    }
-}
-
 fn count_words(iter: std::str::Chars) -> Dict {
     let mut map: Dict = HashMap::new();
 
     for chr in iter  {
-        if !map.contains_key(&chr) {
-            map.insert(chr, 1);
-        }else {
-            if let Some(value) =  map.get_mut(&chr) {
-                *value+=1;
-            }
-        }
+        let value = map.entry(chr).or_insert(0);
+        *value += 1;
     }
-
-
-    return map;
+    map
 }
 
 fn stringify(wordMap: &Dict) -> String {
@@ -43,8 +27,7 @@ fn stringify(wordMap: &Dict) -> String {
     for value in wordMap.values() {
         buffer.push_str( &value.to_string() );
     }
-
-    return buffer.replace("1", "");
+    buffer.replace("1", "")
 }
 
 fn main() {
@@ -53,12 +36,11 @@ fn main() {
     let size = lines.len();
     lines.split_off(size - 1);
 
-
     let mut buffer = String::from("");
     let mut cache: Dict = HashMap::new();
     for i in &lines {
         buffer = stringify( &count_words( i.chars() ) );
-        if(buffer != "") {
+        if buffer != "" {
             cache = count_words( buffer.chars() ).keys().fold(cache, |mut acc, next| {
                 {
                     let counter = acc.entry(*next).or_insert(0);
@@ -66,7 +48,6 @@ fn main() {
                 }
                 acc
             });
-
         }
     }
 
