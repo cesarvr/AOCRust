@@ -15,7 +15,6 @@ func make_group(wordCounter map[string]int) (map[int]int) {
       group[value] = value
     }
   }
-
   return group
 }
 
@@ -32,7 +31,6 @@ func counter(split_word []string) (map[string]int) {
 
   return wordCounter
 }
-
 
 func checksum(groups [](map[int]int), size int) int {
   numberCounter := []string{}
@@ -77,6 +75,7 @@ func check_id(words []string){
 
 func main() {
   data, err := ioutil.ReadFile("db.txt")
+
   if err != nil {
     fmt.Println("File reading error", err)
     return
