@@ -1,42 +1,74 @@
 use std::fs;
 use std::collections::HashMap;
 
-fn count_words(my_str: &str) -> i32 {
-    let mut counter: HashMap<char, i32> = HashMap::new();
+type Dict = HashMap<char, i32>;
+fn debug_dict(dict: &Dict) {
+    for key in dict.keys() {
+        match dict.get(key) {
+           Some(data) => println!("key {} -> {}", key, data),
+           None => println!("{} empty!.", key)
+       }
+    }
+}
 
-    for chr in my_str.chars() {
-        match counter.get_mut(&chr) {
-            Some(size) => {
-                *size+=1;
-                &counter.insert(chr, *size);
-            },
-            None => { counter.insert(chr, 1); },
+fn reduce(dict: &Dict) {
+    for key in dict.keys() {
+        match dict.get(key) {
+           Some(data) => println!("key {} -> {}", key, data),
+           None => println!("{} empty!.", key)
+       }
+    }
+}
+
+fn count_words(iter: std::str::Chars) -> Dict {
+    let mut map: Dict = HashMap::new();
+
+    for chr in iter  {
+        if !map.contains_key(&chr) {
+            map.insert(chr, 1);
+        }else {
+            if let Some(value) =  map.get_mut(&chr) {
+                *value+=1;
+            }
         }
     }
 
-    let mut freq = Vec::new();
-    for value in counter.values() {
-        if !freq.contains(&value) {
-            freq.push(value);
-        }
+
+    return map;
+}
+
+fn stringify(wordMap: &Dict) -> String {
+    let mut buffer = String::from("");
+
+    for value in wordMap.values() {
+        buffer.push_str( &value.to_string() );
     }
 
-    let mut total = 0;
-    for n in &freq {
-        println!("r -> {}", n);
-        total += *n;
-    }
-
-    return total;
+    return buffer.replace("1", "");
 }
 
 fn main() {
-    let content = fs::read_to_string("./test.txt").expect("file not found");
+    let content = fs::read_to_string("./db.txt").expect("file not found");
     let mut lines = content.split("\n").collect::<Vec<&str>>();
     let size = lines.len();
     lines.split_off(size - 1);
 
+
+    let mut buffer = String::from("");
+    let mut cache: Dict = HashMap::new();
     for i in &lines {
-        println!("l -> {} total -> {}", i, count_words(i) );
+        buffer = stringify( &count_words( i.chars() ) );
+        if(buffer != "") {
+            cache = count_words( buffer.chars() ).keys().fold(cache, |mut acc, next| {
+                {
+                    let counter = acc.entry(*next).or_insert(0);
+                    *counter += 1;
+                }
+                acc
+            });
+
+        }
     }
+
+    println!("result: {}", cache.values().fold(1, |acc, next| acc * next ));
 }
