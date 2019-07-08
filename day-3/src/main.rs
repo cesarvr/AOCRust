@@ -120,7 +120,6 @@ fn show(claim: &Claim){
 
 fn main() {
     let claims = read_list::<Claim>("./test.txt");
-
     
     let canvas = Canvas::new();
 
