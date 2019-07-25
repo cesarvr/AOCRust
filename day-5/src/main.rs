@@ -77,7 +77,7 @@ fn main() {
 
     println!("solution 1: {}", process(&mut code.to_vec()) );
 
-    let series = code.iter().map(|chr| {
+    let minimum_reaction = code.iter().map(|chr| {
         if None == cache.get(&chr.to_lowercase()) {
             let mut moded = remove_unit(&code, chr.as_str());
 
@@ -85,8 +85,11 @@ fn main() {
             return process(&mut moded);
         }
         0x00beef
-    }).collect::<Vec<i32>>();
+    })
+    .filter(|&n| n != 0x00beef)
+    .min()
+    .unwrap();
 
-    let minimum_reaction = series.iter().filter(|&n| *n != 0x00beef).min().unwrap();
+    //let minimum_reaction = series.iter().filter(|&n| *n != 0x00beef).min().unwrap();
     println!("solution 2: {}", minimum_reaction);
 }
