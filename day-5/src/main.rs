@@ -22,8 +22,35 @@ fn react(token1: &String, token2: &String) -> bool {
     false
 }
 
+
+fn process_v2(tokens: &mut Vec<String>) -> i32 {
+    let mut end = tokens.len() - 1;
+
+    while end  > 0 {
+        let c1 = tokens.get(end).unwrap(); 
+        let c2 = tokens.get(end - 1).unwrap(); 
+
+        //println!("c1 {}, c2 {}  => end: {} len: {}", c1, c2, end, tokens.len());
+
+        if react(&c1, &c2) {
+            tokens.remove(end);
+            tokens.remove(end - 1);
+
+            //println!("next end-> {}", tokens.len());
+            if end == (tokens.len()+1) {
+            // print!("this is the back remove extra");
+                end = end - 1;
+            }
+        }
+
+        end = end - 1;
+    }
+
+    tokens.len() as i32
+}
+
 fn process(tokens: &mut Vec<String>) -> i32 {
-    let mut polymer: Vec<String> = Vec::new();
+    let mut polymer: Vec<String> = Vec::with_capacity(tokens.len());
 
     /*  for: aBBa
      *  1
@@ -40,6 +67,7 @@ fn process(tokens: &mut Vec<String>) -> i32 {
      * polymer = ['a', 'B']
      *
      */
+
     while let Some(token) = tokens.pop() {
         if polymer.is_empty() {
             polymer.push(token);
@@ -62,12 +90,12 @@ fn process(tokens: &mut Vec<String>) -> i32 {
  */
 fn remove_unit(polymer: &Vec<String>, remove_chr: &str ) -> Vec<String> {
     let mut filtered_polymer: Vec<String> = polymer.to_vec();
-    filtered_polymer.retain(|s| !equal_ignore_case(s, remove_chr)  );
+    filtered_polymer.retain(|s| !equal_ignore_case(s, remove_chr) );
     filtered_polymer
 }
 
 fn main() {
-    let mut code = read_file("./input.txt");
+    let mut code = read_file("./test.txt");
     let mut cache : HashMap<String, bool> = HashMap::new();
 
     println!("sample size {}", code.len());
@@ -75,14 +103,13 @@ fn main() {
 
     code.retain(|s| !s.is_empty() && s.as_bytes()[0] != 10 );
 
-    println!("solution 1: {}", process(&mut code.to_vec()) );
-
+    println!("solution 1: {}", process_v2(&mut code.to_vec()) );
     let minimum_reaction = code.iter().map(|chr| {
         if None == cache.get(&chr.to_lowercase()) {
-            let mut moded = remove_unit(&code, chr.as_str());
+            let mut moded = remove_unit(&code, chr);
 
             cache.insert(chr.to_lowercase(), true);
-            return process(&mut moded);
+            return process_v2(&mut moded);
         }
         0x00beef
     })
@@ -92,4 +119,5 @@ fn main() {
 
     //let minimum_reaction = series.iter().filter(|&n| *n != 0x00beef).min().unwrap();
     println!("solution 2: {}", minimum_reaction);
+
 }
