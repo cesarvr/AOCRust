@@ -1,6 +1,5 @@
 use std::fs;
 use std::collections::HashMap;
-use std::ascii::AsciiExt;
 
 fn read_file(file: &str) -> Vec<String> {
     let list = fs::read_to_string(file)
@@ -17,7 +16,7 @@ fn equal_ignore_case(a: &str, b: &str) -> bool{
 
 fn react(token1: &String, token2: &String) -> bool {
     if equal_ignore_case(token1, token2) {
-        return token1.to_string() != token2.to_string()
+        return token1 != token2
     }
 
     false
@@ -50,8 +49,8 @@ fn process(tokens: &mut Vec<String>) -> i32 {
         let candidate = polymer.pop().unwrap();
 
         if !react(&candidate, &token) {
-            polymer.push(candidate.to_string());
-            polymer.push(token.to_string());
+            polymer.push(candidate);
+            polymer.push(token);
         }
     }
 
