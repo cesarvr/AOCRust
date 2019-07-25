@@ -1,5 +1,6 @@
 use std::fs;
 use std::collections::HashMap;
+use std::ascii::AsciiExt;
 
 fn read_file(file: &str) -> Vec<String> {
     let list = fs::read_to_string(file)
@@ -7,12 +8,15 @@ fn read_file(file: &str) -> Vec<String> {
 
     let tokens = list.split("");
 
-
     tokens.map(|s| s.to_string()).collect::<Vec<String>>()
 }
 
+fn equal_ignore_case(a: &str, b: &str) -> bool{
+    a.eq_ignore_ascii_case(b)
+}
+
 fn react(token1: &String, token2: &String) -> bool {
-    if token1.to_lowercase() == token2.to_lowercase() {
+    if equal_ignore_case(token1, token2) {
         return token1.to_string() != token2.to_string()
     }
 
@@ -58,13 +62,13 @@ fn process(tokens: &mut Vec<String>) -> i32 {
  *
  */
 fn remove_unit(polymer: &Vec<String>, remove_chr: &str ) -> Vec<String> {
-    let mut npoly: Vec<String> = polymer.to_vec();
-    npoly.retain(|s| *s != remove_chr.to_lowercase() && *s != remove_chr.to_uppercase() );
-    npoly
+    let mut filtered_polymer: Vec<String> = polymer.to_vec();
+    filtered_polymer.retain(|s| !equal_ignore_case(s, remove_chr)  );
+    filtered_polymer
 }
 
 fn main() {
-    let mut code = read_file("./input2.txt");
+    let mut code = read_file("./input.txt");
     let mut cache : HashMap<String, bool> = HashMap::new();
 
     println!("sample size {}", code.len());
