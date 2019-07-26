@@ -21,10 +21,9 @@ fn react(token1: &String, token2: &String) -> bool {
 
 fn process(tokens: &mut Vec<String>) -> i32 {
     let mut polymer: Vec<String> = Vec::new();
-    tokens.retain(|s| !s.is_empty() && s.as_bytes()[0] != 10 );
 
     /*  for: aBBa
-     *  1 
+     *  1
      * token = 'a'
      * polymer ['a']
      * tokens ['a', 'B', 'B' ]
@@ -33,7 +32,7 @@ fn process(tokens: &mut Vec<String>) -> i32 {
      * polymer ['a']
      * tokens ['a', 'B', 'B' ]
      * candidate = a
-     * token = 'B' 
+     * token = 'B'
      *
      * polymer = ['a', 'B']
      *
@@ -49,9 +48,8 @@ fn process(tokens: &mut Vec<String>) -> i32 {
         if !react(&candidate, &token) {
             polymer.push(candidate.to_string());
             polymer.push(token.to_string());
-        } 
+        }
     }
-
 
     polymer.len() as i32
 }
@@ -66,26 +64,26 @@ fn remove_unit(polymer: &Vec<String>, remove_chr: &str ) -> Vec<String> {
 }
 
 fn main() {
-    let mut code = read_file("./input.txt");
+    let mut code = read_file("./input2.txt");
+    let mut cache : HashMap<String, bool> = HashMap::new();
+
     println!("sample size {}", code.len());
     println!("--");
 
-    let mut cache : HashMap<String, bool> = HashMap::new();
     code.retain(|s| !s.is_empty() && s.as_bytes()[0] != 10 );
 
     println!("solution 1: {}", process(&mut code.to_vec()) );
 
     let series = code.iter().map(|chr| {
         if None == cache.get(&chr.to_lowercase()) {
-            let mut moded = remove_unit(&code, chr.as_str()); 
+            let mut moded = remove_unit(&code, chr.as_str());
 
             cache.insert(chr.to_lowercase(), true);
             return process(&mut moded);
         }
-
-        -666
+        0x00beef
     }).collect::<Vec<i32>>();
 
-    let minimum_reaction = series.iter().filter(|&n| *n != -666).min().unwrap();
+    let minimum_reaction = series.iter().filter(|&n| *n != 0x00beef).min().unwrap();
     println!("solution 2: {}", minimum_reaction);
 }

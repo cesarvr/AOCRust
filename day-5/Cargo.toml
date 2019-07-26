@@ -5,3 +5,6 @@ authors = ["cesar <cesar.valdez@gosub.consulting>"]
 edition = "2018"
 
 [dependencies]
+
+[profile.release]
+opt-level = 3
