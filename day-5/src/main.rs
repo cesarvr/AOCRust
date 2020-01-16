@@ -1,6 +1,5 @@
 use std::fs;
 use std::collections::HashMap;
-use std::ascii::AsciiExt;
 
 fn read_file(file: &str) -> Vec<String> {
     let list = fs::read_to_string(file)
