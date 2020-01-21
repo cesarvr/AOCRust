@@ -78,10 +78,10 @@ fn main() {
     println!("solution 1: {}", process(&mut code.to_vec()) );
 
     let series = code.iter().map(|chr| {
-        if None == cache.get(&chr.to_lowercase()) {
+        if None == cache.get(&chr.to_ascii_lowercase()) {
             let mut moded = remove_unit(&code, chr.as_str());
 
-            cache.insert(chr.to_lowercase(), true);
+            cache.insert(chr.to_ascii_lowercase(), true);
             return process(&mut moded);
         }
         0x00beef
