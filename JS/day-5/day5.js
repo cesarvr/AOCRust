@@ -12,29 +12,27 @@ function reacting(candidate_1, candidate_2) {
 }
 
 function process(data) {
-  let queue = []
+  let polymer = []
 
   while(data.length > 0) {
     let candidate_1 = data.pop()
-    let candidate_2 = queue.pop() 
+    let candidate_2 = polymer.pop() 
 
     if (candidate_2 === undefined) {
-      queue.push(candidate_1)
+      polymer.push(candidate_1)
       continue
     }
 
     let react = reacting(candidate_1, candidate_2)
 
     if(!react) {
-      queue.push(candidate_2)
-      queue.push(candidate_1)
+      polymer.push(candidate_2)
+      polymer.push(candidate_1)
     }
 
-  }
+  } 
 
-  let result = queue.reverse().join('')
-
-  return result.length
+  return polymer.length
 }
 
 function remove_units(chr, data) {
