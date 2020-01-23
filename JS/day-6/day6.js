@@ -150,9 +150,12 @@ let orphans = save_tasks(parse(input))
 console.log('walking -> \n' )
 console.log('orphans => ', orphans.map(n => n.name() ) )
 
-let code = orphans.sort(compare).map(node => walk_through(node))	
+let code = orphans.map(node => walk_through(node))	
 console.log('code => ',code, ' answer -> ', code.join(''),  ' is the test working: ',code[0] === 'CABDFE')
 
+console.log('its equals to CKMGUWXFAYNIHLJSDQTREOPZBV', code.join('') === 'CKMGUWXFAYNIHLJSDQTREOPZBV')
+console.log('its equals to GXFAIHCKMYUNLJSWDQTREOPZBV', code.join('') === 'GXFAIHCKMYUNLJSWDQTREOPZBV')
+	
 //console.log('node ->', orphans[0].name())
 //let code = walk_through(orphans.sort(compare)[0])
 //console.log('code => ',code, ' is the test working: ',code[0] === 'CABDFE')
