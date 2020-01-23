@@ -1,4 +1,4 @@
-let input = require('fs').readFileSync('./input.txt').toString()
+let input = require('fs').readFileSync('./test-input.txt').toString()
 
 
 function compare(a, b) {
@@ -13,43 +13,43 @@ function compare(a, b) {
 }
 
 const Task = function(task){
-	let n = {}
+	let oo = {}
 	let data = {}
 
 	data.root = task
 	data.childs = []
 	data.parents = []
 
-	n.addChild = (nchild) => {
-		nchild.childOf( n )
+	oo.addChild = (nchild) => {
+		nchild.childOf( oo )
 		data.childs.push(nchild)
 		data.childs = data.childs
 	}
 
-	n.getChilds  = () => data.childs.map(child => child.name())
-	n.getParents = () => data.parents.map(p => p.name())
+	oo.getChilds  = () => data.childs.map(child => child.name())
+	oo.getParents = () => data.parents.map(p => p.name())
 
-	n.childOf = (parent) => data.parents.push( parent )
+	oo.childOf = (parent) => data.parents.push( parent )
 
-	n.release = (parent) => {
+	oo.release = (parent) => {
 		data.parents = data.parents.filter( p => p.name() !== parent.name() )
 		return data.parents.length === 0
 	}
 
-	n.hasNext = () => data.childs.length !== 0
+	oo.hasNext = () => data.childs.length !== 0
 	
-	n.next    = () => { 
-		data.childs = data.childs.filter(child => child.release(n))
+	oo.next    = () => { 
+		data.childs = data.childs.filter(child => child.release(oo))
 		return data.childs
 	}
 
-	n.isOrphan = () => data.parents.length === 0
+	oo.isOrphan = () => data.parents.length === 0
 
-	n.name = () => data.root
+	oo.name = () => data.root
 
-	n.val = () => data 
+	oo.val = () => data 
 
-	return n
+	return oo
 }
 
 function values(mask, input){
@@ -112,25 +112,118 @@ function seek(childs, tree){
 	return childs.map( child => tree[child] || []).map( child => child.join(''))
 }
 
+const Worker = function(_task) {
+	let task = _task 
+	let cost_task = (t) => ( t.toLowerCase().charCodeAt(0) - 'a'.charCodeAt(0) ) + 1
+	let cost = cost_task(task.name()) 
+	let cycles = 0
+	let oo = {}
+
+	oo.Run = () => {
+		console.log('name: ', task.name(), ' cost => ', cost )
+		cost--
+		return oo 
+	}
+
+	oo.Done = () => {
+		cycles++
+		return cost === 0
+	}
+
+	oo.name = () => 'task:' + task.name()
+	oo.task_name = () =>  task.name()
+	oo.taskResult = () => task.next().flat()
+
+	return oo
+}
+
+const Workers = function() {
+	const WORKER_LIMIT = 4
+	let oo = {}
+	let cycle = 0
+	let available_workers = []
+	let workers_that_have_done = []
+
+	oo.isIdle = () => {
+		return available_workers.length < WORKER_LIMIT
+	} 
+
+	oo.busy = () => available_workers.length > 0
+
+	oo.addTask = (task) => {
+		console.log('ADDING TASK -> ', task.name())
+		available_workers.push( new Worker(task) )
+	}
+
+	oo.done = () => { 
+		let ret = workers_that_have_done
+		workers_that_have_done = []
+		return ret 
+	}
+
+	oo.run = () => {
+	
+		available_workers = available_workers.map(worker => worker.Run() )
+		workers_that_have_done = available_workers.filter( worker => worker.Done() )
+		available_workers = available_workers.filter( worker => !worker.Done() )
+		console.log('cycle ->', cycle)
+		console.log('workers still running ->', available_workers.map(w => w.name()),  ' workers that has finished -> ',workers_that_have_done.map(w => w.name())  )
+		cycle++
+	}
+
+	oo.getCycles = () => cycle
+
+
+	return oo
+}
+
 function walk_through(tasks){
 	let available_tasks = tasks.sort(compare)
 	let ret = []
 	while(available_tasks.length > 0){
-		process.stdout.write('available_tasks -> ' + available_tasks.map(task => task.name()))
-		let current_task = available_tasks.shift() // [ B, D, F ]
-		console.log('    current task ->', current_task.name())
-		let ready_task = current_task.next()
-		console.log('ready_task ->',ready_task.map(t => t.name()))
-		available_tasks.push( ready_task )
+		let current_task = available_tasks.shift() 
+		let new_tasks = current_task.next()
+	
+		available_tasks.push( new_tasks )
 		available_tasks = available_tasks.flat().filter( task => task !== undefined ).sort(compare)
 
 		ret.push( current_task.name() )
-		console.log('ret ->', ret)
 	}
 
 	return ret
 }
 
+function walk_through_with_workers(tasks){
+	let available_tasks = tasks.sort(compare)
+	let ret = []
+	let workers = new Workers()
+
+	while(workers.busy() || available_tasks.length > 0){
+		
+		while(workers.isIdle() && available_tasks.length !== 0) {
+			let t = available_tasks.shift()
+			workers.addTask( t )
+		}
+
+		workers.run()
+
+		console.log('workers busy: ', workers.busy())
+
+		let finished  = workers.done()
+
+		ret += finished.map(wrk => wrk.task_name())
+		
+		if(finished !== undefined && finished.length > 0) {
+			let results = finished.map( wrk => wrk.taskResult() ).flat()
+					
+			available_tasks.push( results ) 
+			available_tasks = available_tasks.flat().filter( task => task !== undefined ).sort(compare)
+		}
+	}
+
+	console.log('r-> ', ret, ' cycles->', workers.getCycles())
+	return ret
+}
 
 
 /*
@@ -144,28 +237,16 @@ function walk_through(tasks){
   F: [ 'E' ]
  }
 */
+/*
+let code = walk_through( save_tasks(parse(input)) ) 
 
-
-let orphans = save_tasks(parse(input))
-console.log('walking -> \n' )
-console.log('orphans => ', orphans.map( n => n.name() ) )
-
-let code = walk_through( orphans ) 	
 console.log('code => ',code, ' answer -> ', code.join(''),  ' is the test working: ',code[0] === 'CABDFE')
+
 console.log('its equals to CKMGUWXFAYNIHLJSDQTREOPZBV', code.join('') === 'CKMGUWXFAYNIHLJSDQTREOPZBV')
 console.log('its equals to GXFAIHCKMYUNLJSWDQTREOPZBV', code.join('') === 'GXFAIHCKMYUNLJSWDQTREOPZBV')
 console.log('its equals to CKMGUWXFAIHSYDNLJQTREOPZBV', code.join('') === 'CKMGUWXFAIHSYDNLJQTREOPZBV')
 
-//console.log('node ->', orphans[0].name())
-//let code = walk_through(orphans.sort(compare)[0])
-//console.log('code => ',code, ' is the test working: ',code[0] === 'CABDFE')
-
-//let code = orphans.sort(compare).map(n => { console.log(n.name(), ''); return n; }).map(node => walk_through(node))	
-//console.log('code => ',code, ' answer -> ', code.join(''),  ' is the test working: ',code[0] === 'CABDFE')
-
-
-/*let orphan = orphans[0]
-console.log('node ->', orphan.name())
-let code = walk_through(orphan)
-console.log('code => ',code, ' is the test working: ',code[0] === 'CABDFE')
 */
+walk_through_with_workers( save_tasks(parse(input)) ) 
+//console.log(' answer -> ', code1.join(''),  ' is the test working: ',code1.join('') === 'CGKMUWXFAIHSYDNLJQTREOPZBV')
+
