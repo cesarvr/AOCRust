@@ -19,12 +19,11 @@ const Task = function(task){
 
 	n.release = (parent) => {
 		data.parents = data.parents.filter( p => p.name() !== parent.name() )
-		//console.log('parentsRemaining => ', data.parents.map(p => p.name()))
 		return data.parents.length === 0
 	}
 
-	n.execute = () => { 
-		let child_task = data.childs.shift()
+	n.execute = (index) => { 
+		let child_task = data.childs[index]
 		
 		if(child_task !== undefined && child_task.release(n)) { 
 			return child_task
@@ -104,13 +103,13 @@ function seek(childs, tree){
 
 function walk_through(task){
 	if(task === undefined) return ''
-
+	let index = 0
 	let ret = task.name() 
-	let tt  = task.execute()
+	let tt  = task.execute(index++)
 	
 	while(tt !== undefined){
 		ret += walk_through(tt)
-		tt = task.execute()
+		tt = task.execute(index++)
 	}
 
 	return ret
@@ -134,7 +133,7 @@ let orphans = save_tasks(parse(input))
 console.log('walking -> \n' )
 console.log('orphans => ', orphans.map(n => n.name() ) )
 
-let code = orphans.map(walk_through)	
+let code = orphans.sort().map(node => walk_through(node))	
 
 
-console.log('code => ', code)
+console.log('code => ', code,  ' is the test working: ',code[0] === 'CABDFE')
