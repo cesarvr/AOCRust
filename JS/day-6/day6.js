@@ -27,13 +27,12 @@ const Task = function(task){
 	}
 
 	n.getChilds = () => data.childs.map(child => child.name())
+	n.getParents = () => data.parents.map(p => p.name())
 
 	n.childOf = (parent) => data.parents.push( parent )
 
 	n.release = (parent) => {
-		console.log('parents ->', data.parents.map(p => p.name()) )
 		data.parents = data.parents.filter( p => p.name() !== parent.name() )
-		console.log('parents ->', data.parents.map(p => p.name()) )
 		return data.parents.length === 0
 	}
 
@@ -41,12 +40,12 @@ const Task = function(task){
 	n.next    = () => { 
 		
 		let child_task = data.childs.shift()
-		console.log('daddy->', n.name(), 'child len -> ', data.childs.length, ' child -> ', child_task.name())
+		console.log('daddy->', n.name(), 'child len -> ', n.getChilds(), ' child -> ', child_task.name(), ' is free: ', child_task.release(n), ' parents: ', child_task.getParents())
 
 		if(child_task !== undefined && child_task.release(n)) { 
+			console.log('executing -> ', child_task.name())
 			return child_task
 		}
-		console.log('locked')
 		return undefined
 	}
 
@@ -150,13 +149,24 @@ let orphans = save_tasks(parse(input))
 console.log('walking -> \n' )
 console.log('orphans => ', orphans.map(n => n.name() ) )
 
-let code = orphans.map(node => walk_through(node))	
+let code = orphans.sort(compare).map(node => walk_through(node))	
 console.log('code => ',code, ' answer -> ', code.join(''),  ' is the test working: ',code[0] === 'CABDFE')
-
 console.log('its equals to CKMGUWXFAYNIHLJSDQTREOPZBV', code.join('') === 'CKMGUWXFAYNIHLJSDQTREOPZBV')
 console.log('its equals to GXFAIHCKMYUNLJSWDQTREOPZBV', code.join('') === 'GXFAIHCKMYUNLJSWDQTREOPZBV')
 	
+let code2 = orphans.sort(compare).map(node => walk_through(node))
+console.log('code => ',code2)
+
 //console.log('node ->', orphans[0].name())
 //let code = walk_through(orphans.sort(compare)[0])
 //console.log('code => ',code, ' is the test working: ',code[0] === 'CABDFE')
 
+//let code = orphans.sort(compare).map(n => { console.log(n.name(), ''); return n; }).map(node => walk_through(node))	
+//console.log('code => ',code, ' answer -> ', code.join(''),  ' is the test working: ',code[0] === 'CABDFE')
+
+
+/*let orphan = orphans[0]
+console.log('node ->', orphan.name())
+let code = walk_through(orphan)
+console.log('code => ',code, ' is the test working: ',code[0] === 'CABDFE')
+*/
