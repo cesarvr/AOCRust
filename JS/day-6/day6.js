@@ -23,10 +23,10 @@ const Task = function(task){
 	n.addChild = (nchild) => {
 		nchild.childOf( n )
 		data.childs.push(nchild)
-		data.childs = data.childs.sort(compare)
+		data.childs = data.childs
 	}
 
-	n.getChilds = () => data.childs.map(child => child.name())
+	n.getChilds  = () => data.childs.map(child => child.name())
 	n.getParents = () => data.parents.map(p => p.name())
 
 	n.childOf = (parent) => data.parents.push( parent )
@@ -37,16 +37,10 @@ const Task = function(task){
 	}
 
 	n.hasNext = () => data.childs.length !== 0
+	
 	n.next    = () => { 
-		
-		let child_task = data.childs.shift()
-		console.log('daddy->', n.name(), 'child len -> ', n.getChilds(), ' child -> ', child_task.name(), ' is free: ', child_task.release(n), ' parents: ', child_task.getParents())
-
-		if(child_task !== undefined && child_task.release(n)) { 
-			console.log('executing -> ', child_task.name())
-			return child_task
-		}
-		return undefined
+		data.childs = data.childs.filter(child => child.release(n))
+		return data.childs
 	}
 
 	n.isOrphan = () => data.parents.length === 0
@@ -122,9 +116,16 @@ function walk_through(task){
 	if(task === undefined) return ''
 	
 	let ret = task.name() 
+	let available_tasks = task.next().sort(compare)
 
-	while(task.hasNext()){
-		ret += walk_through(task.next())
+	while(available_tasks.length > 0){
+		let current_task = available_tasks.shift() // [ B, D, F ]
+
+		available_tasks.push( current_task.next() )
+		available_tasks = available_tasks.flat().filter( task => task !== undefined ).sort(compare)
+
+		ret += current_task.name()
+		console.log('available_tasks -> ', available_tasks.map(task => task.name()))
 	}
 
 	return ret
@@ -153,9 +154,6 @@ let code = orphans.sort(compare).map(node => walk_through(node))
 console.log('code => ',code, ' answer -> ', code.join(''),  ' is the test working: ',code[0] === 'CABDFE')
 console.log('its equals to CKMGUWXFAYNIHLJSDQTREOPZBV', code.join('') === 'CKMGUWXFAYNIHLJSDQTREOPZBV')
 console.log('its equals to GXFAIHCKMYUNLJSWDQTREOPZBV', code.join('') === 'GXFAIHCKMYUNLJSWDQTREOPZBV')
-	
-let code2 = orphans.sort(compare).map(node => walk_through(node))
-console.log('code => ',code2)
 
 //console.log('node ->', orphans[0].name())
 //let code = walk_through(orphans.sort(compare)[0])
