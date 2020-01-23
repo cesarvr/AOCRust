@@ -1,47 +1,41 @@
-let input = require('fs').readFileSync('./test-input.txt').toString()
+let input = require('fs').readFileSync('./input.txt').toString()
 
-const Task = function(task){
-	let n = {}
-	let data = {}
+function values(mask, input){
+	let ret = []
+	mask  =  mask.split('')
+	input = input.split('')
 
-	data.root = task
-	data.childs = []
-	data.parents = []
+	for(let i=0; i<mask.length; i++){	
+ 		if(input[i] !== mask[i])
+ 			ret.push(input[i])	
+ 	}
 
-	n.addChild = (nchild) => {
-		nchild.childOf( n )
-		data.childs.push(nchild)
-		data.childs = data.childs.sort(compare)
-	}
-
-	n.getChilds = () => data.childs.map(child => child.name())
-	n.getParents = () => data.parents.map(p => p.name())
-
-	n.childOf = (parent) => data.parents.push( parent )
-
-	n.release = (parent) => {
-		data.parents = data.parents.filter( p => p.name() !== parent.name() ).sort(compare)
-		return data.parents.length === 0
-	}
-
-	n.hasNext = () => data.childs.length !== 0
-	n.next    = () => { 
-		
-		let child_task = data.childs.shift()
-		console.log('daddy->', n.name(), 'child len -> ', n.getChilds(), ' child -> ', child_task.name(), ' is free: ', child_task.release(n), ' parents: ', child_task.getParents())
-
-		if(child_task !== undefined && child_task.release(n)) { 
-			console.log('executing -> ', child_task.name())
-			return child_task
-		}
-		return undefined
-	}
-
-	n.isOrphan = () => data.parents.length === 0
-
-	n.name = () => data.root
-
-	n.val = () => data 
-
-	return n
+ 	return ret 
 }
+
+function parse(input){
+	let mask = `Step $ must be finished before step $ can begin.`
+ 	input = input.split('\n')
+
+ 	return input.map(line => values(mask, line))
+}
+
+function give_me_nodes(raw_nodes){
+	let cache = {}
+
+	raw_nodes.forEach(raw_node => {
+		let parent = raw_node[0]
+		let child  = raw_node[1]
+
+		cache[parent] = cache[parent] || [] 
+		cache[parent].push(child)
+		cache[parent].sort()
+ 	})
+
+	return cache
+}
+
+
+let orphans = give_me_nodes(parse(input))
+
+console.log('orphans -> ', orphans)

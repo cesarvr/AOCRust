@@ -112,20 +112,20 @@ function seek(childs, tree){
 	return childs.map( child => tree[child] || []).map( child => child.join(''))
 }
 
-function walk_through(task){
-	if(task === undefined) return ''
-	
-	let ret = task.name() 
-	let available_tasks = task.next().sort(compare)
-
+function walk_through(tasks){
+	let available_tasks = tasks.sort(compare)
+	let ret = []
 	while(available_tasks.length > 0){
+		process.stdout.write('available_tasks -> ' + available_tasks.map(task => task.name()))
 		let current_task = available_tasks.shift() // [ B, D, F ]
-
-		available_tasks.push( current_task.next() )
+		console.log('    current task ->', current_task.name())
+		let ready_task = current_task.next()
+		console.log('ready_task ->',ready_task.map(t => t.name()))
+		available_tasks.push( ready_task )
 		available_tasks = available_tasks.flat().filter( task => task !== undefined ).sort(compare)
 
-		ret += current_task.name()
-		console.log('available_tasks -> ', available_tasks.map(task => task.name()))
+		ret.push( current_task.name() )
+		console.log('ret ->', ret)
 	}
 
 	return ret
@@ -148,12 +148,13 @@ function walk_through(task){
 
 let orphans = save_tasks(parse(input))
 console.log('walking -> \n' )
-console.log('orphans => ', orphans.map(n => n.name() ) )
+console.log('orphans => ', orphans.map( n => n.name() ) )
 
-let code = orphans.sort(compare).map(node => walk_through(node))	
+let code = walk_through( orphans ) 	
 console.log('code => ',code, ' answer -> ', code.join(''),  ' is the test working: ',code[0] === 'CABDFE')
 console.log('its equals to CKMGUWXFAYNIHLJSDQTREOPZBV', code.join('') === 'CKMGUWXFAYNIHLJSDQTREOPZBV')
 console.log('its equals to GXFAIHCKMYUNLJSWDQTREOPZBV', code.join('') === 'GXFAIHCKMYUNLJSWDQTREOPZBV')
+console.log('its equals to CKMGUWXFAIHSYDNLJQTREOPZBV', code.join('') === 'CKMGUWXFAIHSYDNLJQTREOPZBV')
 
 //console.log('node ->', orphans[0].name())
 //let code = walk_through(orphans.sort(compare)[0])
