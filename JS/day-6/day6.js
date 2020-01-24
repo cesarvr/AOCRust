@@ -1,5 +1,4 @@
-let input = require('fs').readFileSync('./test-input.txt').toString()
-
+let input = require('fs').readFileSync('./input.txt').toString()
 
 function compare(a, b) {
   if (a.name().toLowerCase() < b.name().toLowerCase()) {
@@ -112,21 +111,16 @@ function seek(childs, tree){
 	return childs.map( child => tree[child] || []).map( child => child.join(''))
 }
 
-const Worker = function(_task) {
-	let task = _task 
-	let cost_task = (t) => ( t.toLowerCase().charCodeAt(0) - 'a'.charCodeAt(0) ) + 1
-	let cost = cost_task(task.name()) 
-	let cycles = 0
-	let oo = {}
+const Worker = function(task) {
+	let cost_task = (t) => (( t.toLowerCase().charCodeAt(0) - 'a'.charCodeAt(0) ) + 1 ) + 60
+	let cost = cost_task(task.name()), oo = {}
 
 	oo.Run = () => {
-		console.log('name: ', task.name(), ' cost => ', cost )
 		cost--
 		return oo 
 	}
 
 	oo.Done = () => {
-		cycles++
 		return cost === 0
 	}
 
@@ -138,7 +132,7 @@ const Worker = function(_task) {
 }
 
 const Workers = function() {
-	const WORKER_LIMIT = 4
+	const WORKER_LIMIT = 5
 	let oo = {}
 	let cycle = 0
 	let available_workers = []
@@ -151,7 +145,7 @@ const Workers = function() {
 	oo.busy = () => available_workers.length > 0
 
 	oo.addTask = (task) => {
-		console.log('ADDING TASK -> ', task.name())
+	//	console.log('ADDING TASK -> ', task.name())
 		available_workers.push( new Worker(task) )
 	}
 
@@ -166,8 +160,7 @@ const Workers = function() {
 		available_workers = available_workers.map(worker => worker.Run() )
 		workers_that_have_done = available_workers.filter( worker => worker.Done() )
 		available_workers = available_workers.filter( worker => !worker.Done() )
-		console.log('cycle ->', cycle)
-		console.log('workers still running ->', available_workers.map(w => w.name()),  ' workers that has finished -> ',workers_that_have_done.map(w => w.name())  )
+	
 		cycle++
 	}
 
@@ -199,15 +192,13 @@ function walk_through_with_workers(tasks){
 	let workers = new Workers()
 
 	while(workers.busy() || available_tasks.length > 0){
-		
+
 		while(workers.isIdle() && available_tasks.length !== 0) {
 			let t = available_tasks.shift()
 			workers.addTask( t )
 		}
 
 		workers.run()
-
-		console.log('workers busy: ', workers.busy())
 
 		let finished  = workers.done()
 
@@ -221,10 +212,8 @@ function walk_through_with_workers(tasks){
 		}
 	}
 
-	console.log('r-> ', ret, ' cycles->', workers.getCycles())
-	return ret
+	return workers.getCycles()
 }
-
 
 /*
  CABDFE
@@ -237,16 +226,13 @@ function walk_through_with_workers(tasks){
   F: [ 'E' ]
  }
 */
-/*
-let code = walk_through( save_tasks(parse(input)) ) 
 
-console.log('code => ',code, ' answer -> ', code.join(''),  ' is the test working: ',code[0] === 'CABDFE')
+let code = walk_through( save_tasks(parse(input)) ) 
 
 console.log('its equals to CKMGUWXFAYNIHLJSDQTREOPZBV', code.join('') === 'CKMGUWXFAYNIHLJSDQTREOPZBV')
 console.log('its equals to GXFAIHCKMYUNLJSWDQTREOPZBV', code.join('') === 'GXFAIHCKMYUNLJSWDQTREOPZBV')
 console.log('its equals to CKMGUWXFAIHSYDNLJQTREOPZBV', code.join('') === 'CKMGUWXFAIHSYDNLJQTREOPZBV')
 
-*/
-walk_through_with_workers( save_tasks(parse(input)) ) 
-//console.log(' answer -> ', code1.join(''),  ' is the test working: ',code1.join('') === 'CGKMUWXFAIHSYDNLJQTREOPZBV')
-
+console.log('\nanswer -> ', code.join(''),  ' is the test working: ',code.join('') === 'CGKMUWXFAIHSYDNLJQTREOPZBV')
+let cycles = walk_through_with_workers( save_tasks(parse(input)) ) 
+console.log('answer -> ', cycles,  ' is the test working: ',cycles === 1046)
