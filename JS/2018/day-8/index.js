@@ -1,6 +1,5 @@
 let getInput = (file) => require('fs').readFileSync(file).toString().split(' ').map(n => parseInt(n))
 
-
 /*
  * {node [1a, 1b:[2ba] ]}
  *
@@ -25,8 +24,6 @@ const getRootValue = (myTree) => {
 
   return values
 }
-
-
 
 
 /*
@@ -107,13 +104,8 @@ const metadataCounter = (myTree) => {
       sum += metadataCounter(myTree.node[i]) //1a, 1b[] 
   }
 
-  
-
-
   return sum
 }
-
-
 
 
 let input = getInput('./input.txt')
@@ -123,8 +115,4 @@ console.log('tree -> ', t)
 let r = metadataCounter(t)
 console.log('total metadata -> ', r)
 console.log('Puzzle 2: ', t.value)
-
-
-
-
 
