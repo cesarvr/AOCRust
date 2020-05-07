@@ -1,15 +1,3 @@
-function grid(){
-  let g = []
-  for(let y=0; y<300; y++){
-    for(let x=0; x<300; x++){
-      g[y] = g[y] || []
-      g[y][x] = {x, y}
-    }
-  }
-
-  return g
-}
-
 /*  3,5
  *  3+10 * 5 +  8 = 73
  *   13  * 73= 949 
@@ -31,6 +19,55 @@ function calculate_power(cell, serialNumber){
   return cell
 }
 
+function grid({serialNumber}){
+  let g = []
+  for(let y=0; y<300; y++){
+    for(let x=0; x<300; x++){
+      g[y] = g[y] || []
+      g[y][x] = {x, y, cell: calculate_power({x, y}, serialNumber)}
+    }
+  }
+
+  return g
+}
+
+
+/*  297, 297
+ *  297, 298, 299
+ *w
+ */
+
+function scan_NxN(g, _x, _y, level){
+  let total = 0
+  for(let y=0; y<level; y++)
+    for(let x=0; x<level; x++)
+      total += g[y+_y][x+_x].cell.power 
+
+  return {
+    total,
+    pos: {
+      x: _x, 
+      y: _y
+    }
+  }
+}
+
+
+const scanFast = function(){
+
+  let cache = []
+
+
+  return {
+    total,
+    pos: {
+      x: _x, 
+      y: _y
+    }
+  }
+}
+
+
 function max_power(acc, next) {
   if(acc.total > next.total)
     return acc
@@ -38,159 +75,38 @@ function max_power(acc, next) {
     return next
 }
 
-
-/*  297, 297
- *  297, 298, 299
- *
- */
-
-function scan_3x3(g, _x, _y, serialNumber, level){
-  let pack = []
-
-  for(let y=0; y<level; y++){
-    for(let x=0; x<level; x++){
-      pack.push( calculate_power( g[_y+y][_x+x], serialNumber) ) 
-    }
-  }
-
-  return {
-    pack,
-    pos: {
-      x: _x, 
-      y: _y
-    } 
-  }
-}
-
-/*
- *
- *  Let's use the fact that we end up reusing the squares, a let's reuse previous squares 
- *
- *  1 => x
- *
- *  2 => xx
- *       xx
- *
- *  3 => xxx            4 => xxxx
- *       xxx                 xxxx
- *       xxx                 xxxx 
- *                           xxxx             
- */
-
-/*
- *
- *  (0, 1) (0, 2)
- *  (1, 1) (1, 2)
- *
- *  1x1 Case: 
- *  _x = _y = 0
- *  my = 0
- *  cache = []
- *  start_x = 0
- *  pack = []
- *
- *  for(x)
- *    mx = 0
- *    power_cell = x
- *    cache[0][0] = x
- *    pack.push(x) 
- *
- *  2x2 Case: 
- *  _x = _y = 0
- *  my = 0
- *  cache = [[x]] 
- *  start_x = 1
- *  pack = [x]
- *
- *  for(x -> 1)
- *    mx = 1
- *    power_cell = x_1
- *    cache[0][1] = x_1
- *    pack.push(x_1) 
- *
- * end_x_loop: 
- *    _x = _y = 0
- *    my = 1
- *    cache = [[x], [x_1]] 
- *    start_x = 0
- *    pack = [x]
- *
- *    for(x)
-
- *
- */
-
-function scanFastNxN(){
-  let cache = []
-
-  return function scanNxN(g, _x, _y, serialNumber, level){
-    let pack = []
-
-    for(let y=0; y<level; y++){
-      let my = _y+y
-      cache[my]  = cache[my] || [] 
-      let start_x = cache[my].length
-      pack.push( cache[my][_x] || [] )
-
-      for(let x=start_x; x<level; x++){
-        let mx = _x+x
-        let power_cell = calculate_power( g[my][mx], serialNumber)
-        cache[my][mx] = power_cell 
-        pack.push( power_cell ) 
-      }
-    }
-
-    return {
-      pack: pack.flat(),
-      pos: { x: _x,  y: _y } 
-    }
-  }
-}
-
-function scan(g, serialNumber, level){
+function solve_puzzle_one(g,level){
   const LIMIT = 300 - level 
-  let packs = []
+  let total_power = []
 
   for(let y=0; y<LIMIT; y++){
     for(let x=0; x<LIMIT; x++){
-      packs.push( scan_3x3(g, x, y,serialNumber, level) )
+      total_power.push( scan_NxN(g, x,y, level) )
     }
   }
 
-  return packs
+  return total_power.reduce(max_power, {total:0})
 }
 
-function solve_puzzle_one(g,sn,level){
-  let values = scan(g, sn, level) 
-
-  console.log('values->', values.length)
-  return values.map(p => {
-    p.total = p.pack.reduce((acc, next) => acc + next.power, 0)
-
-    return p
-  }).reduce(max_power, {total: 0})
-}
-
-let g =  grid()
+let g =  grid({serialNumber: 1723})
 //console.log(grid()[0][209])
 
-let sol1 = solve_puzzle_one(g, 1723, 3).pos
+let sol1 = solve_puzzle_one(g, 3).pos
 console.log('solution part 1:',  sol1)
 console.log('solution part 1 (test):', sol1.x === 34 && sol1.y === 13 )
 
 
 let collection = []
-for(let i=1; i<2; i++){
-  let sol = solve_puzzle_one(g, 18, i)
+//let gtest = grid({serialNumber: 18})
+
+for(let i=1; i<300; i++){
+  let sol = solve_puzzle_one(g, i)
   collection.push({sol, level: i, total: sol.total})
 }
 
 let sol2 = collection.reduce(max_power, {total:0})
 
 console.log('solution part 2:', `${sol2.sol.pos.x},${sol2.sol.pos.y},${sol2.level}`)
-console.log('solution part 2:', `position: ${JSON.stringify(sol2.sol.pos)}, Size: ${sol2.level}x${sol2.level}, Total power: ${sol2.total}`)
-console.log('sol ->', sol2.sol, collection.length)
-
-
+console.log('test solution 2', sol2.sol.pos.x === 280 && sol2.sol.pos.y===218 && sol2.level === 11 )
 
 
