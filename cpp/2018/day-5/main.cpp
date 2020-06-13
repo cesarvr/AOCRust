@@ -44,6 +44,8 @@ int solve_2(string input){
 
   string buffer; 
   int hasz[200];
+
+  // rudimentary hashmap.
   memset(hasz, 0, 200);
   int minima = INT_MAX;
 
@@ -56,7 +58,6 @@ int solve_2(string input){
       continue;
     }
 
-
     for(auto c : input){
       if(alfa != tolower(c)){
         buffer+= c;
@@ -66,9 +67,7 @@ int solve_2(string input){
     int r = solve_1(buffer);
 
     minima = (minima < r)? minima:r;
-
     hasz[code] = 1;
-
     buffer.clear();
   }
 
