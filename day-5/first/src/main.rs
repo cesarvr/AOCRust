@@ -70,8 +70,6 @@ fn main() {
     let mut code = read_file("./input.txt");
     let mut cache : HashMap<String, bool> = HashMap::new();
 
-    println!("sample size {}", code.len());
-    println!("--");
 
     code.retain(|s| !s.is_empty() && s.as_bytes()[0] != 10 );
 
@@ -89,4 +87,5 @@ fn main() {
 
     let minimum_reaction = series.iter().filter(|&n| *n != 0x00beef).min().unwrap();
     println!("solution 2: {}", minimum_reaction);
+
 }

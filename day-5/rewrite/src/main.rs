@@ -44,7 +44,6 @@ fn solve2(input: &str) -> u32 {
         repeated.insert(c.to_ascii_lowercase(), true);
     }
 
-    println!("answer debug: {}", minimal);        
     minimal
 }
 
