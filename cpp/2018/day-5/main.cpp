@@ -1,3 +1,11 @@
+#ifdef __linux__ 
+#include <string.h>
+#include <stdint.h>
+#elif _WIN32
+#else 
+#error "OS not supported!"
+#endif
+
 #include <iostream>
 #include <vector>
 #include <fstream>
@@ -47,7 +55,7 @@ int solve_2(string input){
 
   // rudimentary hashmap.
   memset(hasz, 0, 200);
-  int minima = INT_MAX;
+  int minima = INT32_MAX;
 
   for(auto _alfa: input){
     int cnt =0;
